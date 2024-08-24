@@ -6,41 +6,30 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.vladimir.t1.currency.service.api.auth.*;
-import org.vladimir.t1.currency.service.api.auth.deserilalazer.RefreshTokenJweStringDeserializer;
-import org.vladimir.t1.currency.service.api.auth.serialzer.AccessTokenJwsStringSerializer;
-import org.vladimir.t1.currency.service.api.auth.serialzer.RefreshTokenJweStringSerializer;
+import org.vladimir.t1.currency.service.api.auth.BlockedTokenStorage;
+import org.vladimir.t1.currency.service.api.auth.token.RefreshToken;
+import org.vladimir.t1.currency.service.api.auth.token.TokensFabric;
+import org.vladimir.t1.currency.service.api.auth.token.deserilalazer.RefreshTokenJweStringDeserializer;
 import org.vladimir.t1.currency.service.api.exception.token.TokenException;
 import org.vladimir.t1.currency.service.api.exception.token.TokenExceptionType;
-import org.vladimir.t1.currency.service.api.repository.UserRepository;
 import org.vladimir.t1.currency.service.api.service.UserService;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.time.Instant;
-import java.util.UUID;
-
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @RequiredArgsConstructor
 public class RefreshJwtFilter extends OncePerRequestFilter {
+
     AntPathRequestMatcher antPathRequestMatcher = new AntPathRequestMatcher("/users/me/refresh-token", "POST");
 
     private final UserService userService;
-
-
     private final RefreshTokenJweStringDeserializer refreshTokenDeserializer;
+    private final TokensFabric tokensFabric;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final BlockedTokenStorage blockedTokenStorage;
 
-    private final AccessTokenJwsStringSerializer accessTokenSerializer;
-    private final RefreshTokenJweStringSerializer refreshTokenSerializer;
-
-    private  final BlockedTokenStorage blockedTokenStorage;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
@@ -61,24 +50,24 @@ public class RefreshJwtFilter extends OncePerRequestFilter {
             if (blockedTokenStorage.isBlocked(refreshToken.id()))
                 throw new TokenException(TokenExceptionType.TOKEN_BLOCKED, "Token is blocked. Make new login and get new tokens");
 
-            AccessToken token = getAccessToken(refreshToken.userId());
-            if (token == null)
-                throw new TokenException(TokenExceptionType.REFRESH_TOKEN_OUTDATED, "User doesnt found");
+            var userId = refreshToken.userId();
+            var userInfo = userService.getUserInfo(userId);
+
+            if (userInfo == null)
+                throw new TokenException(TokenExceptionType.TOKEN_BLOCKED, "User not found");
+            if (userInfo.disabled())
+                throw new TokenException(TokenExceptionType.TOKEN_BLOCKED, "User is blocked");
+
+
+            var tokensPair = tokensFabric.createTokens(userId, userInfo.role());
+            var tokensJson = objectMapper.writeValueAsString(tokensPair);
 
             response.setContentType("application/json");
-            response.getWriter().write(new ObjectMapper().writeValueAsString(
-                    new Tokens(
-                            accessTokenSerializer.apply(token)
-                           ,refreshTokenSerializer.apply(refreshToken))));
+            response.getWriter().write(tokensJson);
 
         } else {
-            filterChain.doFilter(request,response);
+            filterChain.doFilter(request, response);
         }
     }
-    private AccessToken getAccessToken(Integer userId){
-        var user =  userService.getUserInfo(userId);
-        if (user == null)
-                return null;
-        return new AccessToken(UUID.randomUUID(),userId,user.role(),Instant.now(), Instant.now().plus(Duration.ofMinutes(40)));
-    }
+
 }

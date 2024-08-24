@@ -1,22 +1,16 @@
 package org.vladimir.t1.currency.service.api.controller;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.web.bind.annotation.*;
 import org.vladimir.t1.currency.service.api.auth.LoginAndRegistrationAuthentication;
 import org.vladimir.t1.currency.service.api.dto.LoginRequest;
 import org.vladimir.t1.currency.service.api.dto.RegistrationRequest;
-import org.vladimir.t1.currency.service.api.entity.User;
 import org.vladimir.t1.currency.service.api.service.UserService;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j

@@ -1,10 +1,10 @@
-package org.vladimir.t1.currency.service.api.auth.deserilalazer;
+package org.vladimir.t1.currency.service.api.auth.token.deserilalazer;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
-import org.vladimir.t1.currency.service.api.auth.AccessToken;
+import org.vladimir.t1.currency.service.api.auth.token.AccessToken;
 
 import java.text.ParseException;
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package org.vladimir.t1.currency.service.api.auth.serialzer;
+package org.vladimir.t1.currency.service.api.auth.token.serialzer;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jwt.EncryptedJWT;
@@ -6,7 +6,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vladimir.t1.currency.service.api.auth.RefreshToken;
+import org.vladimir.t1.currency.service.api.auth.token.RefreshToken;
 
 import java.util.Date;
 import java.util.function.Function;

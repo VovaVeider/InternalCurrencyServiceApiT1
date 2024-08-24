@@ -8,8 +8,8 @@ import org.vladimir.t1.currency.service.api.dto.*;
 import org.vladimir.t1.currency.service.api.entity.Account;
 import org.vladimir.t1.currency.service.api.entity.User;
 import org.vladimir.t1.currency.service.api.entity.UserRole;
-import org.vladimir.t1.currency.service.api.exception.login.LoginExceptionType;
 import org.vladimir.t1.currency.service.api.exception.login.LoginException;
+import org.vladimir.t1.currency.service.api.exception.login.LoginExceptionType;
 import org.vladimir.t1.currency.service.api.exception.registration.RegistrationException;
 import org.vladimir.t1.currency.service.api.exception.registration.RegistrationExceptionType;
 import org.vladimir.t1.currency.service.api.repository.AccountRepository;
@@ -90,7 +90,7 @@ public class UserService {
         var optionalUser = userRepository.findById(userId);
         if (optionalUser.isPresent()) {
             var user = optionalUser.get();
-            return new UserInfo(user.getUsername(), user.getRole().name());
+            return new UserInfo(user.getUsername(), user.getRole().name(),user.getDisabled());
         } else{
             return null;
         }

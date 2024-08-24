@@ -3,6 +3,7 @@ package org.vladimir.t1.currency.service.api.auth;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.vladimir.t1.currency.service.api.auth.token.AccessToken;
 
 import java.util.Collection;
 import java.util.List;

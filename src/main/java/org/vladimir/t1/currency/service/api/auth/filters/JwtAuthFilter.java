@@ -6,24 +6,20 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.vladimir.t1.currency.service.api.auth.AccessToken;
 import org.vladimir.t1.currency.service.api.auth.BlockedTokenStorage;
 import org.vladimir.t1.currency.service.api.auth.TokenAuthentication;
-import org.vladimir.t1.currency.service.api.auth.deserilalazer.AccessTokenJwsStringDeserializer;
+import org.vladimir.t1.currency.service.api.auth.token.AccessToken;
+import org.vladimir.t1.currency.service.api.auth.token.deserilalazer.AccessTokenJwsStringDeserializer;
 import org.vladimir.t1.currency.service.api.exception.token.TokenException;
 import org.vladimir.t1.currency.service.api.exception.token.TokenExceptionType;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {

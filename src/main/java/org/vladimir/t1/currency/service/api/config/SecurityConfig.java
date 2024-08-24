@@ -1,44 +1,37 @@
 package org.vladimir.t1.currency.service.api.config;
 
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.KeyLengthException;
 import com.nimbusds.jose.crypto.DirectDecrypter;
 import com.nimbusds.jose.crypto.DirectEncrypter;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
-
-import io.micrometer.observation.Observation;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.servlet.support.ErrorPageFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.AbstractSecurityBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.context.SecurityContextHolderFilter;
-import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.web.filter.CorsFilter;
 import org.vladimir.t1.currency.service.api.auth.BlockedTokenStorage;
-import org.vladimir.t1.currency.service.api.auth.deserilalazer.AccessTokenJwsStringDeserializer;
-import org.vladimir.t1.currency.service.api.auth.deserilalazer.RefreshTokenJweStringDeserializer;
 import org.vladimir.t1.currency.service.api.auth.filters.*;
-import org.vladimir.t1.currency.service.api.auth.serialzer.AccessTokenJwsStringSerializer;
-import org.vladimir.t1.currency.service.api.auth.serialzer.RefreshTokenJweStringSerializer;
+import org.vladimir.t1.currency.service.api.auth.token.TokensFabric;
+import org.vladimir.t1.currency.service.api.auth.token.deserilalazer.AccessTokenJwsStringDeserializer;
+import org.vladimir.t1.currency.service.api.auth.token.deserilalazer.RefreshTokenJweStringDeserializer;
+import org.vladimir.t1.currency.service.api.auth.token.serialzer.AccessTokenJwsStringSerializer;
+import org.vladimir.t1.currency.service.api.auth.token.serialzer.RefreshTokenJweStringSerializer;
 import org.vladimir.t1.currency.service.api.service.UserService;
 
 import java.text.ParseException;
-import java.util.Arrays;
+import java.time.Duration;
 import java.util.List;
 
 @Configuration
@@ -46,23 +39,32 @@ import java.util.List;
 public class SecurityConfig {
 
     @Bean
-    AccessTokenJwsStringSerializer accessTokenJwsStringSerializer(@Value("${jwt.access.secret}") String accessTokenKey) throws ParseException, KeyLengthException {
+    AccessTokenJwsStringSerializer accessSerializer(@Value("${jwt.access.secret}") String accessTokenKey) throws ParseException, KeyLengthException {
         return new AccessTokenJwsStringSerializer(new MACSigner(OctetSequenceKey.parse(accessTokenKey)));
     }
 
     @Bean
-    AccessTokenJwsStringDeserializer accessTokenJwsStringDeserializer(@Value("${jwt.access.secret}") String accessTokenKey) throws ParseException, JOSEException {
+    AccessTokenJwsStringDeserializer accessTokenDeserializer(@Value("${jwt.access.secret}") String accessTokenKey) throws ParseException, JOSEException {
         return new AccessTokenJwsStringDeserializer(new MACVerifier(OctetSequenceKey.parse(accessTokenKey)));
     }
 
     @Bean
-    RefreshTokenJweStringSerializer refreshTokenJweStringSerializer(@Value("${jwt.refresh.secret}") String refreshTokenKey) throws ParseException, KeyLengthException {
+    RefreshTokenJweStringSerializer refreshTokenSerializer(@Value("${jwt.refresh.secret}") String refreshTokenKey) throws ParseException, KeyLengthException {
         return new RefreshTokenJweStringSerializer(new DirectEncrypter(OctetSequenceKey.parse(refreshTokenKey)));
     }
 
     @Bean
-    RefreshTokenJweStringDeserializer refreshTokenJweStringDeserializer(@Value("${jwt.refresh.secret}") String refreshTokenKey) throws ParseException, KeyLengthException {
+    RefreshTokenJweStringDeserializer refreshTokenDeserializer(@Value("${jwt.refresh.secret}") String refreshTokenKey) throws ParseException, KeyLengthException {
         return new RefreshTokenJweStringDeserializer(new DirectDecrypter(OctetSequenceKey.parse(refreshTokenKey)));
+    }
+
+    @Bean
+    TokensFabric tokensFabric(@Value("${jwt.access.ttl}") long accessTokenTTL,
+                              @Value("${jwt.refresh.ttl}") long refreshTokenTTL,
+                              AccessTokenJwsStringSerializer accessTokenSerializer,
+                              RefreshTokenJweStringSerializer refreshTokenSerializer) {
+        return new TokensFabric(accessTokenSerializer, refreshTokenSerializer,
+                Duration.ofSeconds(accessTokenTTL), Duration.ofSeconds(refreshTokenTTL));
     }
 
     @Bean
@@ -76,9 +78,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public GetJwtFilter getJwtFilter(AccessTokenJwsStringSerializer accessTokenJwsStringSerializer,
-                                     RefreshTokenJweStringSerializer refreshTokenJweStringDeserializer) {
-        return new GetJwtFilter(accessTokenJwsStringSerializer, refreshTokenJweStringDeserializer);
+    public GetJwtFilter getJwtFilter(TokensFabric tokensFabric) {
+        return new GetJwtFilter(tokensFabric);
     }
 
 
@@ -91,13 +92,14 @@ public class SecurityConfig {
 
     @Bean
     public RefreshJwtFilter refreshJwtFilter(UserService userService,
-                                             RefreshTokenJweStringSerializer refreshTokenJweStringSerializer,
                                              RefreshTokenJweStringDeserializer refreshTokenJweStringDeserializer,
-                                             AccessTokenJwsStringSerializer accessTokenJwsStringSerializer) {
-        return new RefreshJwtFilter(userService, refreshTokenJweStringDeserializer, accessTokenJwsStringSerializer, refreshTokenJweStringSerializer, blockedTokenStorage());
+                                             TokensFabric tokensFabric) {
+
+        return new RefreshJwtFilter(userService, refreshTokenJweStringDeserializer,
+                tokensFabric, blockedTokenStorage()
+        );
     }
 
-    ;
 
     @Bean
     public SecurityFilterChain configure(HttpSecurity http, JwtAuthFilter jwtAuthFilter,

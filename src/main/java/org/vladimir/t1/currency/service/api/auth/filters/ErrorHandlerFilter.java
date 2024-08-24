@@ -11,20 +11,22 @@ import org.vladimir.t1.currency.service.api.dto.ErrorResponse;
 import org.vladimir.t1.currency.service.api.exception.ApiException;
 
 import java.io.IOException;
+
 @Slf4j
 public class ErrorHandlerFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-            log.info("ErrorHandlerFilter input Request URI: {}", request.getRequestURI());
+            log.info("ErrorHandlerFilter call doFilter(). Request URI: {} Method: {}", request.getRequestURI(), request.getMethod());
             filterChain.doFilter(request, response);
-            log.info("ErrorHandlerFilter output");
+            log.info("ErrorHandlerFilter return from doFilter(). Request URI: {} Method: {}", request.getRequestURI(), request.getMethod());
         } catch (ApiException ae) {
             response.setContentType("application/json");
-            log.error("ErrorHandlerFilter error: {}", ae.getMessage());
-            response.setStatus(400);
-            response.getWriter().write(new ObjectMapper().writeValueAsString(new ErrorResponse(ae.getType(),ae.getMessage(), ae.getDescription())));
+            log.error("ErrorHandlerFilter handle error. Class: {} , Type: {}, Reason{}, Description: {}",
+                    ae.getClass().getSimpleName(), ae.getType(), ae.getReason(), ae.getDescription());
+            response.setStatus(ae.getHttpStatus().value());
+            response.getWriter().write(new ObjectMapper().writeValueAsString(new ErrorResponse(ae.getType(), ae.getMessage(), ae.getDescription())));
         }
     }
 }

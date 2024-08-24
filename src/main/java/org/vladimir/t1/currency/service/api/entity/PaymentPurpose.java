@@ -2,7 +2,6 @@ package org.vladimir.t1.currency.service.api.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Cache;
 
 
 @Entity

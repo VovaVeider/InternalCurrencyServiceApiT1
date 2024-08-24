@@ -7,13 +7,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.vladimir.t1.currency.service.api.auth.BlockedTokenStorage;
 import org.vladimir.t1.currency.service.api.auth.TokenAuthentication;
 
 import java.io.IOException;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 public class JwtLogoutFilter extends OncePerRequestFilter {
