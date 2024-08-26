@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+  postgresql:
+    build: ./postgres
+    container_name: postgres_db
+    restart: on-failure
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_ROOT_PASSWORD: test
+    ports:
+      - "5432:5432"
+
+  spring-app:
+    build: ./spring-app
+    container_name: spring-app
+    restart: on-failure
+    ports:
+      - "80:8085"
+    environment:
+      DB_HOST: postgres_db
+      DB_PORT: 5432
+      DB_NAME: test
+      DB_USER: test
+      DB_PASSWORD: test
+    depends_on:
+      - postgresql
