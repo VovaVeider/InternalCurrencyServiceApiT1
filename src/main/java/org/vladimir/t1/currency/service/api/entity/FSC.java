@@ -21,7 +21,7 @@ public class FSC {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY,optional = false)
+    @OneToOne(fetch = FetchType.EAGER,optional = false,cascade = CascadeType.ALL)
     private Account account;
 
     @Column(name = "created_at", nullable = false)

@@ -3,7 +3,7 @@ package org.vladimir.t1.currency.service.api.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.vladimir.t1.currency.service.api.dto.TransactionReportDto;
+import org.vladimir.t1.currency.service.api.dto.user.TransactionReportDto;
 import org.vladimir.t1.currency.service.api.entity.*;
 import org.vladimir.t1.currency.service.api.exception.transaction.TransactionException;
 import org.vladimir.t1.currency.service.api.exception.transaction.TransactionExceptionType;
@@ -72,9 +72,9 @@ public class TransactionService {
 
         if (isUserAccount(fromAccountNumber) && isFscAccount(toAccountNumber))
             throw new TransactionException(validExType, "User cant send money to  to FSC account ");
-        if (AccountType.STORE_CFO_ACCOUNT == fromType)
+        if (AccountType.STORE_FSC_ACCOUNT == fromType)
             throw new TransactionException(validExType, "Store  cant send money, it cam only receive");
-        if (isFscAccount(fromAccountNumber) && AccountType.STORE_CFO_ACCOUNT == toType)
+        if (isFscAccount(fromAccountNumber) && AccountType.STORE_FSC_ACCOUNT == toType)
             throw new TransactionException(validExType, "Fsc  cant send money to store fsc, it can only users");
         if (AccountType.MASTER_FSC_ACCOUNT == fromType && isUserAccount(toAccountNumber))
             throw new TransactionException(validExType, "Master can sent money only to team fsc");

@@ -1,9 +1,11 @@
 package org.vladimir.t1.currency.service.api.entity;
 
-import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
-@UtilityClass
+@Slf4j
 public class AccountUtils {
+
+
     public static AccountType getAccountType(final String accountNumber) {
         return AccountType.fromCode(Integer.parseInt(accountNumber.substring(0, 3)));
     }
@@ -21,12 +23,23 @@ public class AccountUtils {
     public static boolean isFscAccount(final String accountNumber) {
         var accountType = getAccountType(accountNumber);
         return (accountType == AccountType.MASTER_FSC_ACCOUNT) ||
-                (accountType == AccountType.TEAM_CFO_ACCOUNT) ||
-                (accountType == AccountType.STORE_CFO_ACCOUNT);
+                (accountType == AccountType.TEAM_FSC_ACCOUNT) ||
+                (accountType == AccountType.STORE_FSC_ACCOUNT);
 
     }
     public static boolean isUserAccount(final String accountNumber) {
         return ! isFscAccount(accountNumber);
+    }
+    public static AccountType getAccountType(final FscType fscType){
+        return switch (fscType) {
+            case MASTER -> AccountType.MASTER_FSC_ACCOUNT;
+            case TEAM -> AccountType.TEAM_FSC_ACCOUNT;
+            case STORE -> AccountType.STORE_FSC_ACCOUNT;
+            default -> {
+                log.error("Invalid fsc account type: {}", fscType);
+                throw new IllegalArgumentException("Invalid fsc type");
+            }
+        };
     }
 
 }

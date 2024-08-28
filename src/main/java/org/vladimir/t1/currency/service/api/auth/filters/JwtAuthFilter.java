@@ -31,13 +31,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final List<AntPathRequestMatcher> excludedPaths =
             List.of(new AntPathRequestMatcher("/users", "POST"),
                     new AntPathRequestMatcher("/users/me/login", "POST"),
-                    new AntPathRequestMatcher("/users/me/refresh-token", "POST"));
+                    new AntPathRequestMatcher("/users/me/refresh-token", "POST"),
+                    new AntPathRequestMatcher("/swagger-ui/**"),
+                    new AntPathRequestMatcher("/swagger**"),
+                    new AntPathRequestMatcher("/v3/api-docs/**"),
+                    new AntPathRequestMatcher("/swagger.json/*")
+            );
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        if (excludedPaths.stream().noneMatch(requestMatcher -> requestMatcher.matches(request)))
-        {
+        if (excludedPaths.stream().noneMatch(requestMatcher -> requestMatcher.matches(request))) {
             var authHeader = request.getHeader("Authorization");
 
             if (authHeader == null || !authHeader.startsWith("Bearer "))
@@ -59,7 +63,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             SecurityContextHolder.setContext(new SecurityContextImpl(auth));
         }
         filterChain.doFilter(request, response);
-
 
 
     }

@@ -7,11 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.vladimir.t1.currency.service.api.dto.*;
-import org.vladimir.t1.currency.service.api.entity.Account;
-import org.vladimir.t1.currency.service.api.entity.AccountType;
-import org.vladimir.t1.currency.service.api.entity.User;
-import org.vladimir.t1.currency.service.api.entity.UserRole;
+import org.vladimir.t1.currency.service.api.dto.user.*;
+import org.vladimir.t1.currency.service.api.entity.*;
 import org.vladimir.t1.currency.service.api.exception.login.LoginException;
 import org.vladimir.t1.currency.service.api.exception.login.LoginExceptionType;
 import org.vladimir.t1.currency.service.api.exception.registration.RegistrationException;
@@ -107,10 +104,46 @@ public class UserService {
     }
 
     @Transactional
-    public List<UserOpenInfo> findUsersByUsername(String username, int page, int pageSize) {
+    public List<UserOpenInfo> findUsersByUsername(String username, int page, int pageSize, List<UserRole> userRoles) {
         Pageable pageable = PageRequest.of(page - 1, pageSize);
-        Page<User> usersPage = userRepository.findAllByUsernameStartingWith(pageable, username);
+        Page<User> usersPage = userRepository.findAllByUsernameStartingWithAndRoleIn(pageable, username, userRoles);
         var result = usersPage.stream().map(UserToUserOpenInfoMapper::mapUserToUserOpenInfo).toList();
+        return result;
+    }
+
+    public List<UserOpenInfo> findUsersByEmail(String username, int page, int pageSize, List<UserRole> userRoles) {
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
+        Page<User> usersPage = userRepository.findAllByEmailStartingWithAndRoleIn(pageable, username, userRoles);
+        var result = usersPage.stream().map(UserToUserOpenInfoMapper::mapUserToUserOpenInfo).toList();
+        return result;
+    }
+
+    @Transactional
+    public List<UserDto> findUsersProfilesByUsername(String username, int page, int pageSize, List<UserRole> userRoles) {
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
+        Page<User> usersPage = userRepository.findAllByUsernameStartingWithAndRoleIn(pageable, username, userRoles);
+        var result = usersPage.stream().map(user -> new UserDto(user.getId(),
+                user.getUsername(),
+                user.getName(),
+                user.getLastname(),
+                user.getSurname(),
+                user.getEmail(),
+                user.getRole())
+        ).toList();
+        return result;
+    }
+
+    public List<UserDto> findUsersProfilesByEmail(String username, int page, int pageSize, List<UserRole> userRoles) {
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
+        Page<User> usersPage = userRepository.findAllByEmailStartingWithAndRoleIn(pageable, username, userRoles);
+        var result = usersPage.stream().map(user -> new UserDto(user.getId(),
+                user.getUsername(),
+                user.getName(),
+                user.getLastname(),
+                user.getSurname(),
+                user.getEmail(),
+                user.getRole())
+        ).toList();
         return result;
     }
 
@@ -127,12 +160,6 @@ public class UserService {
         }
     }
 
-    public List<UserOpenInfo> findUsersByEmail(String username, int page, int pageSize) {
-        Pageable pageable = PageRequest.of(page - 1, pageSize);
-        Page<User> usersPage = userRepository.findAllByEmailStartingWith(pageable, username);
-        var result = usersPage.stream().map(UserToUserOpenInfoMapper::mapUserToUserOpenInfo).toList();
-        return result;
-    }
 
     @Transactional()
     public TransactionReportDto makeTransaction(Long userId, String fromAccountNumber, String toAccountNumber,
@@ -145,7 +172,7 @@ public class UserService {
         if (!Objects.equals(user.getAccount().getAccountNumber(), fromAccountNumber))
             throw new TransactionException(TransactionExceptionType.TRANSACTION_VALIDATION_FAILED, "User is not owner of  from account ");
 
-        var paymentPurpose = paymentPurposeRepository.findById(paymentPurposeId).orElseThrow(() ->
+        var paymentPurpose = paymentPurposeRepository.findByIdAndType(paymentPurposeId, PaymentPurposeType.USER_TO_USER).orElseThrow(() ->
                 new TransactionException(
                         TransactionExceptionType.PAYMENT_PURPOSE_NOT_SUPPORTED, "Incorrect payment purpose"
                 )

@@ -7,7 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.vladimir.t1.currency.service.api.entity.User;
+import org.vladimir.t1.currency.service.api.entity.UserRole;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -17,9 +19,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String username);
 
-    Page<User> findAllByUsernameStartingWith(Pageable pageable, @Param("username") String username);
+    Page<User> findAllByUsernameStartingWithAndRoleIn(Pageable pageable, @Param("username") String username, List<UserRole> roles);
 
-    Page<User> findAllByEmailStartingWith(Pageable pageable, String username);
+    Page<User> findAllByEmailStartingWithAndRoleIn(Pageable pageable, @Param("username") String username, List<UserRole> roles);
 
     @Query("SELECT u from User u where u.account.accountNumber = :accountNumber")
     Optional<User> findByAccountNumber(String accountNumber);

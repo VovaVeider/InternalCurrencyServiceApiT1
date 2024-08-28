@@ -8,7 +8,7 @@ CREATE TABLE "user_roles"
 
 CREATE TABLE "fsc_type"
 (
-    "id"   serial PRIMARY KEY,
+    "id"   int PRIMARY KEY,
     "name" varchar UNIQUE NOT NULL
 );
 
@@ -75,8 +75,15 @@ CREATE TABLE "fsc_teams"
 
 CREATE TABLE "payment_purposes"
 (
-    "id"   bigserial PRIMARY KEY,
-    "name" varchar NOT NULL
+    "id"                   bigserial PRIMARY KEY,
+    "name"                 varchar NOT NULL,
+    "payment_purpose_type" bigint
+);
+
+CREATE TABLE "payments_purposes_types"
+(
+    "id"   bigint PRIMARY KEY,
+    "name" varchar UNIQUE
 );
 
 CREATE TABLE "bills"
@@ -123,6 +130,9 @@ ALTER TABLE "transactions"
 ALTER TABLE "transactions"
     ADD FOREIGN KEY ("payment_purpose") REFERENCES "payment_purposes" ("id");
 
+ALTER TABLE "payment_purposes"
+    ADD FOREIGN KEY ("payment_purpose_type") REFERENCES "payments_purposes_types" ("id");
+
 ALTER TABLE "fsc_teams"
     ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
@@ -142,6 +152,7 @@ ALTER TABLE "bills"
     ADD FOREIGN KEY ("transaction_id") REFERENCES "transactions" ("id");
 
 
+
 INSERT INTO user_roles (id, name)
 VALUES (0, 'ROLE_ADMIN');
 INSERT INTO user_roles (id, name)
@@ -149,10 +160,48 @@ VALUES (1, 'ROLE_FSC_OWNER');
 INSERT INTO user_roles (id, name)
 VALUES (2, 'ROLE_USER');
 
-INSERT INTO payment_purposes(name)
-VALUES ('Благодарность'),
-       ('На конфеты'),
-       ('Другое');
+INSERT INTO fsc_type (id, name)
+VALUES (0, 'MASTER');
+INSERT INTO fsc_type (id, name)
+VALUES (1, 'TEAM');
+INSERT INTO fsc_type (id, name)
+VALUES (2, 'STORE');
+
+
+INSERT INTO "payments_purposes_types"(id, name)
+VALUES (0, 'SYSTEM'),
+       (1, 'USER_TO_USER'),
+       (2, 'FSC_TO_USER'),
+       (3, 'FSC_TO_FSC'),
+       (4, 'GENERAL');
+-- Перевод с мастер счета в категории системных
+
+----- системные переводы
+INSERT INTO payment_purposes("payment_purpose_type", name)
+VALUES (0, 'Установка начального баланса при создании'),
+       (0, 'Пополнение ЦФО с мастер-счета'),
+       (0, 'Покупка во внутреннем магазине');
+
+
+-- пользовательские перевод
+INSERT INTO payment_purposes("payment_purpose_type", name)
+VALUES (1, '☕️ На кофе'),
+       (1, '🎁С днем рождения'),
+       (1, '💻С новым годом');
+
+-- Переводы цфо пользователям
+INSERT INTO payment_purposes("payment_purpose_type", name)
+VALUES (2, 'Помощь коллегам'),
+       (2, 'Закрытие спринта'),
+       (2, 'Выпуск в прод');
+--
+INSERT INTO payment_purposes("payment_purpose_type", name)
+VALUES (3, 'Мотивацию команде'),
+       (3, 'Пополнение баланса'),
+       (3, 'Возврат ошибочного перевода');
+
+INSERT INTO payment_purposes("payment_purpose_type", name)
+VALUES (4, 'Другое');
 
 
 ----------------------------------------------------

@@ -5,8 +5,8 @@ import lombok.Getter;
 public enum AccountType {
     USER_ACCOUNT(1),
     MASTER_FSC_ACCOUNT(2),
-    TEAM_CFO_ACCOUNT(3),
-    STORE_CFO_ACCOUNT(4);
+    TEAM_FSC_ACCOUNT(3),
+    STORE_FSC_ACCOUNT(4);
     @Getter
     private final int code;
 
@@ -18,9 +18,12 @@ public enum AccountType {
         return switch (code) {
             case 1 -> USER_ACCOUNT;
             case 2 -> MASTER_FSC_ACCOUNT;
-            case 3 -> TEAM_CFO_ACCOUNT;
-            case 4 -> STORE_CFO_ACCOUNT;
+            case 3 -> TEAM_FSC_ACCOUNT;
+            case 4 -> STORE_FSC_ACCOUNT;
             default -> throw new IllegalArgumentException("Invalid account type code: " + code);
         };
+    }
+    public static String getFormattedAccountTypeCode (AccountType accountType){
+        return "%03d".formatted(accountType.code);
     }
 }

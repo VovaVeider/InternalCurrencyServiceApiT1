@@ -1,6 +1,6 @@
 package org.vladimir.t1.currency.service.api.mapper;
 
-import org.vladimir.t1.currency.service.api.dto.UserInfo;
+import org.vladimir.t1.currency.service.api.dto.user.UserInfo;
 import org.vladimir.t1.currency.service.api.entity.User;
 
 public class UserToUserInfoMapper {
