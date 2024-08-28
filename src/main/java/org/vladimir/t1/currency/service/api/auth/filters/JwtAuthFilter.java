@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
@@ -45,18 +46,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             var authHeader = request.getHeader("Authorization");
 
             if (authHeader == null || !authHeader.startsWith("Bearer "))
-                throw new TokenException(TokenExceptionType.INVALID_TOKEN, "Invalid token was got");
+                throw new TokenException(TokenExceptionType.INVALID_TOKEN,
+                        "Invalid token was got", HttpStatus.UNAUTHORIZED);
 
             AccessToken accessToken = deserializer.apply(authHeader.replace("Bearer ", ""));
 
             if (accessToken == null)
-                throw new TokenException(TokenExceptionType.INVALID_TOKEN, "Invalid token was got");
+                throw new TokenException(TokenExceptionType.INVALID_TOKEN, "Invalid token was got",
+                        HttpStatus.UNAUTHORIZED);
 
             if (accessToken.expires().isBefore(Instant.now()))
-                throw new TokenException(TokenExceptionType.ACCESS_TOKEN_OUTDATED, "Access token expired.Get new via refresh token");
+                throw new TokenException(TokenExceptionType.ACCESS_TOKEN_OUTDATED,
+                        "Access token expired.Get new via refresh token",
+                        HttpStatus.UNAUTHORIZED);
 
             if (blockedTokenStorage.isBlocked(accessToken.id()))
-                throw new TokenException(TokenExceptionType.TOKEN_BLOCKED, "Token is blocked. Make new login and get new tokens");
+                throw new TokenException(TokenExceptionType.TOKEN_BLOCKED,
+                        "Token is blocked. Make new login and get new tokens", HttpStatus.UNAUTHORIZED);
 
             Authentication auth = new TokenAuthentication(accessToken);
             auth.setAuthenticated(true);

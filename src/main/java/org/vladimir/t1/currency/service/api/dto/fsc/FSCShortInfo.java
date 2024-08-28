@@ -1,5 +1,7 @@
 package org.vladimir.t1.currency.service.api.dto.fsc;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +16,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @Builder
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class FSCShortInfo implements Serializable {
     Long id;
     String name;
