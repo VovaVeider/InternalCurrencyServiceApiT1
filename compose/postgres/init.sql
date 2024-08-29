@@ -222,10 +222,10 @@ VALUES (100000, '002000000001', false);
 INSERT INTO accounts(balance, account_number, disabled)
 VALUES (0, '001000000002', false);
 
---Пароль админа(без пробелов): password
+--Пароль админа(без пробелов): admin_rulit_vsegda))
 INSERT INTO users(username, name, lastname, surname, email, role_id, account_id, created_at, disabled, password)
 values ('admin', 'Главный', 'администратор', 'службы платежей', 'admin.currency.service@t1.ru', 0, 2, now(), false,
-        '$2a$10$.JKOJC0bwsvS6DUqrow0Yu0.098kkaNuAX4pnYnHNIHsiuwhKWRhK');
+        '$2a$10$zBwVlYFdYJAp4XCumig3.emTHtUli6vJFVtZh8ocEL2fxmKOOBn/K');
 
 
 -----------------------------------------------------------------

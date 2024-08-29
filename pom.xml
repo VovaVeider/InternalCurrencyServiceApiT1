@@ -8,7 +8,7 @@
         <version>3.3.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <!--    <packaging>war</packaging>-->
+    <!--        <packaging>war</packaging>-->
     <groupId>org.vladimir.t1</groupId>
     <artifactId>InternalCurrencyServiceAPI</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -59,6 +59,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-cache -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
@@ -75,18 +81,6 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.6.0</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct -->
-<!--        <dependency>-->
-<!--            <groupId>org.mapstruct</groupId>-->
-<!--            <artifactId>mapstruct</artifactId>-->
-<!--            <version>${org.mapstruct.version}</version>-->
-<!--        </dependency>-->
-
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.boot</groupId>-->
-        <!--            <artifactId>spring-boot-starter-tomcat</artifactId>-->
-        <!--            <scope>provided</scope>-->
-        <!--        </dependency>-->
 
 
     </dependencies>
@@ -101,19 +95,25 @@
                 <executions>
                     <execution>
                         <id>copy-files</id>
-                        <phase>package</phase>
+                        <phase>package</phase> <!-- Ensure this is the right phase -->
                         <goals>
                             <goal>run</goal>
                         </goals>
                         <configuration>
                             <tasks>
-                                <copy file="${project.build.directory}/${project.build.finalName}.jar" todir="${project.basedir}/compose/spring-app" overwrite="true"/>
-                                <move file="${project.basedir}/compose/spring-app/${project.build.finalName}.jar" tofile="${project.basedir}/compose/spring-app/app.jar"/>
+                                <!-- Copy the jar file to the target directory -->
+                                <copy file="${project.build.directory}/${project.build.finalName}.jar"
+                                      todir="${project.basedir}/compose/spring-app"
+                                      overwrite="true"/>
+                                <!-- Rename the jar file -->
+                                <!--                                <move file="${project.basedir}/compose/spring-app/${project.build.finalName}.jar"-->
+                                <!--                                      tofile="${project.basedir}/compose/spring-app/spring-app.jar"/>-->
                             </tasks>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

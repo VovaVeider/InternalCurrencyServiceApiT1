@@ -26,7 +26,9 @@ public class ErrorHandlerFilter extends OncePerRequestFilter {
             log.error("ErrorHandlerFilter handle error. Class: {} , Type: {}, Reason{}, Description: {}",
                     ae.getClass().getSimpleName(), ae.getType(), ae.getReason(), ae.getDescription());
             response.setStatus(ae.getHttpStatus().value());
-            response.getWriter().write(new ObjectMapper().writeValueAsString(new ErrorResponse(ae.getType(), ae.getMessage(), ae.getDescription())));
+            response.getWriter().write(new ObjectMapper()
+                    .writeValueAsString(new ErrorResponse(ae.getType(), ae.getReason(), ae.getDescription()))
+            );
         }
     }
 }

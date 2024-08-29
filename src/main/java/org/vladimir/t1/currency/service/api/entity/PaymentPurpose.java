@@ -2,6 +2,7 @@ package org.vladimir.t1.currency.service.api.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 
 @Entity
@@ -11,6 +12,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class PaymentPurpose {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
