@@ -1,12 +1,13 @@
 package org.vladimir.t1.currency.service.api.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.vladimir.t1.currency.service.api.dto.SingleFieldResponseDto;
+import org.vladimir.t1.currency.service.api.dto.OneFieldDto;
 import org.vladimir.t1.currency.service.api.dto.fsc.*;
 import org.vladimir.t1.currency.service.api.dto.transaction.PaymentPurposeDto;
 import org.vladimir.t1.currency.service.api.dto.user.TransactionReportDto;
@@ -20,26 +21,26 @@ import java.util.List;
 @RestController
 @RequestMapping("fsc")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "JWT")
 public class FscController {
     private final FscService fscService;
     private final PaymentPurposeService paymentPurposeService;
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
-    public SingleFieldResponseDto<List<FSCShortInfo>> getFscShortInfoList(@RequestParam(required = false) FscType fscType,
-                                                                          @Min(1) int page,
-                                                                          @Min(1) @Max(100) int size) {
+    public OneFieldDto<List<FSCShortInfo>> getFscShortInfoList(@RequestParam(required = false) FscType fscType,
+                                                               @Min(1) int page,
+                                                               @Min(1) @Max(100) int size) {
 
-        return new SingleFieldResponseDto<>(fscService.getFscShortInfoList(fscType, page - 1, size));
+        return new OneFieldDto<>(fscService.getFscShortInfoList(fscType, page - 1, size));
     }
-
     //@PreAuthorize()active-team-fsc
-    @RequestMapping("active-team-fsc")
-    public SingleFieldResponseDto<List<FscInfoDto>> getFscShortInfoList(
+    @GetMapping("active-team-fsc")
+    public OneFieldDto<List<FscInfoDto>> getFscShortInfoList(
             @RequestParam(value = "name", required = true) String name,
             @Min(1) int page,
             @Min(1) @Max(100) int size) {
-        return new SingleFieldResponseDto<>(fscService.getUserFscList(page - 1, size, name));
+        return new OneFieldDto<>(fscService.getUserFscList(page - 1, size, name));
     }
 
 
@@ -59,13 +60,13 @@ public class FscController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_FSC_OWNER')")
     @GetMapping("/payments-purposes")
-    public SingleFieldResponseDto<List<PaymentPurposeDto>> getFscPaymentPurposes(
+    public OneFieldDto<List<PaymentPurposeDto>> getFscPaymentPurposes(
             @RequestParam(value = "reciever", required = true) String reciever) {
         if (reciever == null)
             reciever = "";
         return switch (reciever) {
-            case "user" -> new SingleFieldResponseDto<>(paymentPurposeService.getFscToUserPaymentPurposes());
-            case "fsc" -> new SingleFieldResponseDto<>((paymentPurposeService.getFscToFscPaymentPurposes()));
+            case "user" -> new OneFieldDto<>(paymentPurposeService.getFscToUserPaymentPurposes());
+            case "fsc" -> new OneFieldDto<>((paymentPurposeService.getFscToFscPaymentPurposes()));
             default -> throw new ApiException(
                     "ApiException",
                     "INCORRECT_REQUEST",

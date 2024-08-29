@@ -8,6 +8,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class SingleFieldResponseDto<T> {
+public class OneFieldDto<T> {
     private T data;
 }

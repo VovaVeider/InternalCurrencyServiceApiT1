@@ -1,5 +1,6 @@
 package org.vladimir.t1.currency.service.api.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.web.bind.annotation.*;
 import org.vladimir.t1.currency.service.api.auth.LoginAndRegistrationAuthentication;
-import org.vladimir.t1.currency.service.api.dto.SingleFieldResponseDto;
+import org.vladimir.t1.currency.service.api.dto.OneFieldDto;
 import org.vladimir.t1.currency.service.api.dto.transaction.PaymentPurposeDto;
 import org.vladimir.t1.currency.service.api.dto.user.*;
 import org.vladimir.t1.currency.service.api.entity.UserRole;
@@ -39,6 +40,7 @@ public class UserController {
 
     }
 
+    @SecurityRequirement(name = "JWT")
     @GetMapping("")
     public GetUsersOpenInfoListResponse getUserOpenInfo(@RequestParam(required = false) String username, @RequestParam(required = false) String email, @RequestParam @Min(1) int page, @Max(100) int size) {
         if (username == null && email == null)
@@ -51,6 +53,7 @@ public class UserController {
             return new GetUsersOpenInfoListResponse(userService.findUsersByEmail(email, page, size, Arrays.asList(UserRole.values())));
     }
 
+    @SecurityRequirement(name = "JWT")
     @GetMapping("fsc-owners")
     public AdminsAndFscOwnersResponce getFscOwners(@RequestParam(required = false) String username, @RequestParam(required = false) String email, @RequestParam @Min(1) int page, @Max(100) int size) {
         if (username == null && email == null)
@@ -64,16 +67,19 @@ public class UserController {
             return new AdminsAndFscOwnersResponce(userService.findUsersProfilesByEmail(email, page, size, List.of(UserRole.ROLE_FSC_OWNER, UserRole.ROLE_ADMIN)));
     }
 
+    @SecurityRequirement(name = "JWT")
     @PostMapping("me/transactions")
     public TransactionReportDto makeTransaction(@AuthenticationPrincipal final Long userId, @RequestBody MakeUserTransactionRequest transactionRequest) {
         return userService.makeTransaction(userId, transactionRequest.fromAccountNumber(), transactionRequest.toAccountNumber(), transactionRequest.amount(), transactionRequest.paymentPurpose_id(), transactionRequest.paymentComment());
     }
 
+    @SecurityRequirement(name = "JWT")
     @GetMapping("/payments-purposes")
-    public SingleFieldResponseDto<List<PaymentPurposeDto>> getAllPaymentPurposes() {
-        return new SingleFieldResponseDto<>(paymentPurposeService.getUserToUserPaymentPurposes());
+    public OneFieldDto<List<PaymentPurposeDto>> getAllPaymentPurposes() {
+        return new OneFieldDto<>(paymentPurposeService.getUserToUserPaymentPurposes());
     }
 
+    @SecurityRequirement(name = "JWT")
     @GetMapping("/me")
     public UserInfo getUser(@AuthenticationPrincipal final Long userId) {
         return userService.getUserInfo(userId);
@@ -84,13 +90,6 @@ public class UserController {
         var login = userService.loginUser(loginRequest);
         SecurityContextHolder.setContext(new SecurityContextImpl(new LoginAndRegistrationAuthentication(login.getRole(), login.getUsername(), login.getId())));
     }
-
-
-//    @PreAuthorize("hasRole('ROLE_USER')")
-//    @GetMapping("me/hello")
-//    public ResponseEntity<Map<String, String>> getString() {
-//        return ResponseEntity.ok(Map.of("hello", "hello"));
-//    }
 
 
 }

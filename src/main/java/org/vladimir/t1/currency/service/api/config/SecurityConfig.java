@@ -37,7 +37,7 @@ import java.time.Duration;
 import java.util.List;
 
 @SecurityScheme(
-        name = "Bearer Authentication",
+        name = "JWT",
         type = SecuritySchemeType.HTTP,
         bearerFormat = "JWT",
         scheme = "bearer"
