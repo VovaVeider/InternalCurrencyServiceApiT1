@@ -2,6 +2,7 @@ package org.vladimir.t1.currency.service.api.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.transaction.annotation.Transactional;
 
 @Entity
 @Table(name = "accounts")
@@ -27,6 +28,7 @@ public class Account {
     private String accountNumber; //Первые 3 цифры слева номер типа счет,а остальные справа id счета
 
     @Getter
+    @Transient
     private AccountType accountType;
 
     public void setAccountType(@NonNull AccountType accountType) {
