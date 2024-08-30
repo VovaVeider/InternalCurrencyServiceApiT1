@@ -5,10 +5,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.vladimir.t1.currency.service.api.dto.MasterAccountDto;
 import org.vladimir.t1.currency.service.api.dto.MasterAccountShortAnalitycsReport;
 import org.vladimir.t1.currency.service.api.dto.fsc.TopUpMasterAccountRequest;
@@ -41,7 +38,7 @@ public class BudgetController {
     @PostMapping
     @Operation(summary = "Пополнить баланс мастер счета")
     @Transactional
-    public void topUpMasterAccount(TopUpMasterAccountRequest dto) {
+    public void topUpMasterAccount(@RequestBody TopUpMasterAccountRequest dto) {
         if (dto.amount() == null)
             throw new IllegalArgumentException("Amount must not be null");
         if (dto.amount() <= 0)
@@ -59,7 +56,7 @@ public class BudgetController {
     }
 
     @GetMapping("short-analytics")
-    public MasterAccountShortAnalitycsReport geMasterAccounttShortAnalytics(){
+    public MasterAccountShortAnalitycsReport geMasterAccountShortAnalytics(){
         return budgetService.getShortAnalytics();
     }
 }

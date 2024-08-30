@@ -1,7 +1,6 @@
 package org.vladimir.t1.currency.service.api.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
@@ -24,25 +23,22 @@ public class Account {
 
     @Getter
     @Setter(AccessLevel.PRIVATE)
-    @Column(nullable = false, length = 12, unique = true,name = "account_number")
-    private String accountNumber;//Первые 3 цифры слева номер типа счет,а остальные справа id счета
+    @Column(nullable = false, length = 12, unique = true, name = "account_number")
+    private String accountNumber; //Первые 3 цифры слева номер типа счет,а остальные справа id счета
 
-    @Transient
-    AccountType accountType;
+    @Getter
+    private AccountType accountType;
+
+    public void setAccountType(@NonNull AccountType accountType) {
+        if (this.accountType == null)
+            this.accountType = accountType;
+        else
+            throw new IllegalStateException("Account type already set");
+
+    }
 
     @Column(nullable = false)
     private Long balance;
-
-    @Transient
-    public boolean isUserAccount() {
-        return accountType.equals(AccountType.USER_ACCOUNT);
-    }
-
-    @NotNull
-    @Transient
-    public boolean isFscAccount() {
-        return !isUserAccount();
-    }
 
 
     @PrePersist
@@ -51,7 +47,7 @@ public class Account {
             throw new IllegalStateException("Account must has id before save, but it has null value");
 
         if (accountType != null)
-            accountNumber = AccountUtils.getAccountNumber(accountType,id);
+            accountNumber = AccountUtils.getAccountNumber(accountType, id);
         else
             throw new IllegalStateException("Account must has account type before save, but it has null value");
     }
